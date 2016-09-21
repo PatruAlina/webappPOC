@@ -13,13 +13,24 @@ Including another URLconf
     1. Import the include() function: from django.conf.urls import url, include
     2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
+from django.conf import settings
 from django.conf.urls import url
+from django.conf.urls.static import static
 from django.contrib import admin
 from django.contrib.auth import views as auth_views
 from django.views.generic.base import  TemplateView
+from pentagram import views as pentagram_views
+from rest_framework.authtoken import views as authtoken_views
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
-    url(r'^user/login',auth_views.login,{'template_name':'login.html'},name='login'),
-    url(r'^$', TemplateView.as_view(template_name='index.html'),name='homepage')
-]
+    #url(r'^api/v1/login',pentagram_views.login_auth,{'template_name':'login.html'},name='login'),
+    url(r'^api/v1/login',authtoken_views.obtain_auth_token),
+    url(r'^$', TemplateView.as_view(template_name='index.html'),name='homepage'),
+    url(r'api-token-auth',authtoken_views.obtain_auth_token, name='fetch_token'),
+    url(r'^api/v1/users',pentagram_views.users,name='users'),
+    url(r'^api/v1/photos/$',pentagram_views.photos,name='photos'),
+    url(r'^api/v1/photos/(?P<id_photo>[0-9]+)/$',pentagram_views.photo_id,name='see_photo_details'),
+    url(r'^api/v1/photos/(?P<id_photo>[0-9]+)/comments/$',pentagram_views.comments,name='comments'),
+    url(r'^api/v1/photos/(?P<id_photo>[0-9]+)/likes/$',pentagram_views.likes,name='likes'),
+] + static( settings.MEDIA_URL,document_root=settings.MEDIA_ROOT)
